@@ -261,3 +261,105 @@ class AnalyticsViewSet(viewsets.ViewSet):
 
         serializer = ContractListSerializer(contracts, many=True)
         return Response(serializer.data)
+
+    @action(detail=False, methods=["get"])
+    def temporal_heatmap(self, request):
+        """
+        Get temporal heatmap data for contracts.
+
+        Returns contract activity grouped by date and risk level.
+        Query params:
+        - granularity: 'daily' or 'weekly' (default: 'daily')
+        - days: number of days to look back (default: 180)
+        """
+        granularity = request.query_params.get("granularity", "daily")
+        days = int(request.query_params.get("days", 180))
+
+        start_date = timezone.now().date() - timedelta(days=days)
+
+        contracts = Contract.objects.filter(
+            publication_date__gte=start_date
+        ).values("publication_date").annotate(
+            total=Count("id"),
+            high_risk=Count("id", filter=Q(risk_score__gte=60)),
+            medium_risk=Count("id", filter=Q(risk_score__gte=40, risk_score__lt=60)),
+            low_risk=Count("id", filter=Q(risk_score__lt=40)),
+            total_budget=Sum("budget"),
+            avg_risk=Avg("risk_score"),
+        ).order_by("publication_date")
+
+        # Transform for heatmap
+        heatmap_data = []
+        for item in contracts:
+            heatmap_data.append({
+                "date": item["publication_date"].isoformat(),
+                "total_contracts": item["total"],
+                "high_risk": item["high_risk"],
+                "medium_risk": item["medium_risk"],
+                "low_risk": item["low_risk"],
+                "total_budget": float(item["total_budget"] or 0),
+                "avg_risk": float(item["avg_risk"] or 0),
+            })
+
+        return Response(heatmap_data)
+
+    @action(detail=False, methods=["get"])
+    def geographical_distribution(self, request):
+        """
+        Get geographical distribution of contracts by region/province.
+
+        Returns contract data grouped by Spanish regions with location data.
+        """
+        # Aggregate by region
+        regional_data = (
+            Contract.objects.exclude(region="").exclude(region__isnull=True)
+            .values("region", "province", "municipality")
+            .annotate(
+                total_contracts=Count("id"),
+                total_budget=Sum("budget"),
+                avg_risk_score=Avg("risk_score"),
+                high_risk_count=Count("id", filter=Q(risk_score__gte=60)),
+                awarded_amount=Sum("awarded_amount"),
+            )
+            .order_by("-total_budget")
+        )
+
+        # Transform to geographic format
+        geo_data = []
+        for item in regional_data:
+            geo_data.append({
+                "region": item["region"] or "Unknown",
+                "province": item["province"] or "Unknown",
+                "municipality": item["municipality"] or "Unknown",
+                "total_contracts": item["total_contracts"],
+                "total_budget": float(item["total_budget"] or 0),
+                "awarded_amount": float(item["awarded_amount"] or 0),
+                "avg_risk_score": float(item["avg_risk_score"] or 0),
+                "high_risk_count": item["high_risk_count"],
+            })
+
+        # Also aggregate by just region for map coloring
+        region_summary = (
+            Contract.objects.exclude(region="").exclude(region__isnull=True)
+            .values("region")
+            .annotate(
+                total_budget=Sum("budget"),
+                avg_risk_score=Avg("risk_score"),
+                high_risk_count=Count("id", filter=Q(risk_score__gte=60)),
+                total_contracts=Count("id"),
+            )
+        )
+
+        summary_map = {}
+        for item in region_summary:
+            summary_map[item["region"]] = {
+                "total_budget": float(item["total_budget"] or 0),
+                "avg_risk_score": float(item["avg_risk_score"] or 0),
+                "high_risk_count": item["high_risk_count"],
+                "total_contracts": item["total_contracts"],
+            }
+
+        return Response({
+            "detailed": geo_data,
+            "summary_by_region": summary_map,
+        })

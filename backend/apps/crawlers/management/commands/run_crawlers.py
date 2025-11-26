@@ -61,9 +61,10 @@ class Command(BaseCommand):
         try:
             # Import all crawler implementations
             from apps.crawlers.implementations import pcsp  # noqa: F401
+            from apps.crawlers.implementations import boe  # noqa: F401
 
             # Add more imports as you create more crawlers
-            # from apps.crawlers.implementations import boe, madrid, etc.
+            # from apps.crawlers.implementations import madrid, etc.
         except ImportError as e:
             self.stdout.write(self.style.WARNING(f"Failed to import crawlers: {e}"))
 

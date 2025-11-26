@@ -41,6 +41,40 @@ export interface Provider {
   risk_score?: number;
 }
 
+export interface ContractDetail extends Contract {
+  awarded_amount?: string;
+  overpricing_percentage?: string;
+  procedure_type: string;
+  source_platform: string;
+  deadline_date: string;
+  award_date?: string;
+  has_amendments: boolean;
+  has_delays: boolean;
+  has_high_risk: boolean;
+  is_overpriced: boolean;
+  description?: string;
+  region?: string;
+  province?: string;
+  municipality?: string;
+  contracting_authority: string;
+  corruption_risk: number;
+  delay_risk: number;
+  financial_risk: number;
+  analyzed_at?: string;
+  source_url?: string;
+  awarded_to?: Provider;
+  amendments?: Array<{
+    id: number;
+    amendment_type: string;
+    description: string;
+    reason?: string;
+    amendment_date: string;
+    previous_amount: string;
+    new_amount: string;
+    amount_change_percentage: string;
+  }>;
+}
+
 export interface PaginatedResponse<T> {
   count: number;
   next?: string | null;
@@ -98,6 +132,10 @@ class APIClient {
       url += `?${queryString}`;
     }
     return this.request(url);
+  }
+
+  async getContract(id: number): Promise<ContractDetail> {
+    return this.request(`/contracts/${id}/`);
   }
 
   // Providers

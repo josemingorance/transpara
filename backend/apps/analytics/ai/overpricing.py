@@ -43,6 +43,10 @@ class OverpricingDetector(ContractAIModel):
         # Get the amount to analyze (awarded if available, else budget)
         amount = contract.awarded_amount or contract.budget
 
+        # If no amount data available, cannot assess overpricing
+        if not amount or amount == 0:
+            return Decimal("0")
+
         # Calculate different comparison metrics
         regional_avg = self._get_regional_average(contract)
         authority_avg = self._get_authority_average(contract)

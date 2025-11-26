@@ -196,6 +196,10 @@ class CorruptionRiskScorer(ContractAIModel):
         """
         budget = contract.budget
 
+        # Cannot assess threshold gaming without budget
+        if not budget or budget == 0:
+            return Decimal("0")
+
         # EU thresholds (approximate)
         minor_threshold = Decimal("40000")
         medium_threshold = Decimal("140000")

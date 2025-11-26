@@ -4,6 +4,7 @@ Normalizers for specific data sources.
 Each normalizer knows how to transform data from a specific
 source platform into the standard Contract format.
 """
+from decimal import Decimal
 from typing import Any
 
 from apps.contracts.etl.base import BaseNormalizer
@@ -22,12 +23,18 @@ class PCSPNormalizer(BaseNormalizer):
         """
         Normalize PCSP data.
 
+        Transforms PCSP API response with complete financial and procurement details
+        into standardized Contract format.
+
         Args:
             raw_data: Raw data from PCSP crawler
 
         Returns:
             Normalized contract data
         """
+        # PCSP provides deadline_date not deadline
+        deadline_key = "deadline_date" if "deadline_date" in raw_data else "deadline"
+
         return {
             "external_id": raw_data.get("external_id", ""),
             "title": raw_data.get("title", "").strip(),
@@ -38,7 +45,7 @@ class PCSPNormalizer(BaseNormalizer):
             "awarded_amount": self.parse_money(raw_data.get("awarded_amount")),
             "procedure_type": self._normalize_procedure_type(raw_data.get("procedure_type")),
             "publication_date": self.parse_date(raw_data.get("publication_date")),
-            "deadline_date": self.parse_date(raw_data.get("deadline")),
+            "deadline_date": self.parse_date(raw_data.get(deadline_key)),
             "award_date": self.parse_date(raw_data.get("award_date")),
             "contracting_authority": raw_data.get("contracting_authority", "").strip(),
             "awarded_to_tax_id": raw_data.get("awarded_to_tax_id"),
@@ -84,74 +91,124 @@ class BOENormalizer(BaseNormalizer):
     """
     Normalizer for BOE (Boletín Oficial del Estado).
 
-    Handles data from official state gazette.
+    Transforms data extracted from the BOE API JSON responses
+    into the standard Contract format.
     """
 
     source_platform = "BOE"
 
     def normalize(self, raw_data: dict[str, Any]) -> dict[str, Any]:
         """
-        Normalize BOE data.
+        Normalize BOE API data.
+
+        Transforms BOE crawler output (from JSON API) to standard Contract fields.
 
         Args:
-            raw_data: Raw data from BOE
+            raw_data: Raw data from BOE crawler
 
         Returns:
-            Normalized contract data
+            Normalized contract data dictionary
         """
-        # BOE format is different - adjust as needed
+        # Extract the item_type and determine contract type
+        item_type = raw_data.get("item_type", "OTHER")
+        contract_type = self._infer_contract_type(item_type, raw_data)
+
         return {
-            "external_id": raw_data.get("boe_id", raw_data.get("external_id", "")),
-            "title": raw_data.get("titulo", raw_data.get("title", "")).strip(),
-            "description": raw_data.get("texto", raw_data.get("description", "")).strip(),
-            "contract_type": self.normalize_contract_type(
-                raw_data.get("tipo_contrato", raw_data.get("contract_type"))
-            ),
-            "status": "PUBLISHED",  # BOE entries are always published
-            "budget": self.parse_money(raw_data.get("presupuesto", raw_data.get("budget"))),
-            "awarded_amount": self.parse_money(
-                raw_data.get("importe_adjudicacion", raw_data.get("awarded_amount"))
-            ),
-            "procedure_type": self._normalize_procedure_type(
-                raw_data.get("procedimiento", raw_data.get("procedure_type"))
-            ),
-            "publication_date": self.parse_date(
-                raw_data.get("fecha_publicacion", raw_data.get("publication_date"))
-            ),
-            "deadline_date": self.parse_date(
-                raw_data.get("plazo", raw_data.get("deadline_date"))
-            ),
-            "award_date": self.parse_date(
-                raw_data.get("fecha_adjudicacion", raw_data.get("award_date"))
-            ),
-            "contracting_authority": raw_data.get(
-                "organo_contratacion", raw_data.get("contracting_authority", "")
-            ).strip(),
-            "awarded_to_tax_id": raw_data.get("adjudicatario_cif"),
-            "awarded_to_name": raw_data.get("adjudicatario_nombre"),
-            "region": raw_data.get("comunidad", raw_data.get("region", "")),
-            "province": raw_data.get("provincia", raw_data.get("province", "")),
-            "municipality": raw_data.get("municipio", raw_data.get("municipality", "")),
-            "source_url": raw_data.get("url", raw_data.get("source_url", "")),
+            "external_id": raw_data.get("external_id", ""),
+            "title": raw_data.get("title", "").strip(),
+            "description": self._build_description(raw_data),
+            "contract_type": contract_type,
+            "status": "PUBLISHED",  # All BOE items are published by definition
+            "budget": Decimal("0"),  # BOE API responses don't include budget info
+            "awarded_amount": None,  # BOE API responses don't include awarded amounts
+            "procedure_type": self._infer_procedure_type(item_type),
+            "publication_date": self.parse_date(raw_data.get("publication_date")),
+            "deadline_date": None,  # BOE API doesn't provide deadline
+            "award_date": None,  # BOE API doesn't provide award date
+            "contracting_authority": raw_data.get("contracting_authority", "").strip(),
+            "awarded_to_tax_id": None,  # BOE API doesn't provide awarded provider info
+            "awarded_to_name": None,
+            "region": "",  # Could be extracted from section if needed
+            "province": "",
+            "municipality": "",
+            "source_url": raw_data.get("source_url", ""),
         }
 
-    def _normalize_procedure_type(self, proc_type: str | None) -> str:
-        """Normalize BOE procedure type."""
-        if not proc_type:
-            return "OPEN"
+    def _build_description(self, raw_data: dict[str, Any]) -> str:
+        """
+        Build a description from BOE item metadata.
 
-        proc_lower = proc_type.lower()
+        Args:
+            raw_data: Raw BOE data
 
-        if any(word in proc_lower for word in ["abierto", "open"]):
-            return "OPEN"
-        elif any(word in proc_lower for word in ["restringido", "restricted"]):
-            return "RESTRICTED"
-        elif any(word in proc_lower for word in ["negociado", "negotiated"]):
-            return "NEGOTIATED"
-        elif "menor" in proc_lower:
-            return "MINOR"
+        Returns:
+            Combined description string
+        """
+        parts = []
+
+        section = raw_data.get("section", "").strip()
+        if section:
+            parts.append(f"Section: {section}")
+
+        subsection = raw_data.get("subsection", "").strip()
+        if subsection:
+            parts.append(f"Subsection: {subsection}")
+
+        item_type = raw_data.get("item_type", "").strip()
+        if item_type:
+            parts.append(f"Type: {item_type}")
+
+        return " | ".join(parts) if parts else ""
+
+    def _infer_contract_type(self, item_type: str, raw_data: dict[str, Any]) -> str:
+        """
+        Infer contract type from BOE item type and title.
+
+        Args:
+            item_type: BOE item type classification
+            raw_data: Raw BOE data
+
+        Returns:
+            Standardized contract type
+        """
+        if item_type == "CONTRACT":
+            return "SUPPLIES"  # BOE contracts are typically supplies
+
+        # Check title and section for type hints
+        title_lower = raw_data.get("title", "").lower()
+        section_lower = raw_data.get("section", "").lower()
+
+        if any(word in title_lower or word in section_lower for word in ["obra", "construcción", "work"]):
+            return "WORKS"
+        elif any(
+            word in title_lower or word in section_lower
+            for word in ["servicio", "asistencia", "service", "assistance"]
+        ):
+            return "SERVICES"
+        elif any(
+            word in title_lower or word in section_lower
+            for word in ["suministro", "equipo", "material", "supplies", "equipment"]
+        ):
+            return "SUPPLIES"
         else:
-            return "OPEN"
+            return "OTHER"
+
+    def _infer_procedure_type(self, item_type: str) -> str:
+        """
+        Infer procedure type from BOE item type.
+
+        Args:
+            item_type: BOE item type classification
+
+        Returns:
+            Standardized procedure type
+        """
+        if item_type == "ANNOUNCEMENT":
+            return "OPEN"  # Announcements are typically open procedures
+        elif item_type == "REGULATION":
+            return "OPEN"  # Regulations are open information
+        else:
+            return "OPEN"  # Default to open for other types
 
 
 # Registry of normalizers

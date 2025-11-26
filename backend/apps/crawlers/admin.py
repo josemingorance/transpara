@@ -133,8 +133,11 @@ class CrawlerRunAdmin(admin.ModelAdmin):
             color = "orange"
         else:
             color = "red"
+        rate_str = f"{rate:.1f}%"
         return format_html(
-            '<span style="color: {}; font-weight: bold;">{:.1f}%</span>', color, rate
+            '<span style="color: {}; font-weight: bold;">{}</span>',
+            color,
+            rate_str
         )
 
     success_display.short_description = "Success Rate"

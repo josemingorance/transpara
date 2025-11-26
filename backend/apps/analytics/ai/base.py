@@ -140,8 +140,8 @@ class ContractAIModel(BaseAIModel):
         if not contract:
             raise AIModelException("Contract is required")
 
-        if not hasattr(contract, "budget") or not contract.budget:
-            raise AIModelException("Contract must have a budget")
+        if not hasattr(contract, "title") or not contract.title:
+            raise AIModelException("Contract must have a title")
 
 
 class ProviderAIModel(BaseAIModel):
