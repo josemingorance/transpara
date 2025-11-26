@@ -1,0 +1,198 @@
+#!/usr/bin/env python
+import os
+import django
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'config.settings')
+django.setup()
+
+from apps.contracts.models import Contract
+from apps.providers.models import Provider
+
+# Limpiar datos
+Contract.objects.all().delete()
+Provider.objects.all().delete()
+
+# Crear proveedores
+providers = [
+    Provider.objects.create(name="Constructora Magna SL", tax_id="B12345678", risk_score=65),
+    Provider.objects.create(name="Logística Express SA", tax_id="A87654321", risk_score=45),
+    Provider.objects.create(name="Tech Solutions Ibérica", tax_id="C55555555", risk_score=80),
+    Provider.objects.create(name="Servicios Profesionales ABC", tax_id="D66666666", risk_score=35),
+    Provider.objects.create(name="Farmacéutica Global", tax_id="E77777777", risk_score=25),
+    Provider.objects.create(name="Operaciones Limpias SA", tax_id="F88888888", risk_score=40),
+    Provider.objects.create(name="Defensa Equipos Especiales", tax_id="G99999999", risk_score=55),
+    Provider.objects.create(name="Infraestructuras Modernas", tax_id="H11111111", risk_score=90),
+    Provider.objects.create(name="Equipos Médicos Avanzados", tax_id="I22222222", risk_score=50),
+    Provider.objects.create(name="Suministros Generales XYZ", tax_id="J33333333", risk_score=38),
+]
+
+contracts_data = [
+    {
+        "external_id": "CTR-2024-001",
+        "title": "Servicio de mantenimiento de carreteras región Madrid",
+        "budget": "250000.00",
+        "contracting_authority": "Consejería de Transportes Madrid",
+        "publication_date": "2024-01-15",
+        "risk_score": 45,
+        "status": "AWARDED",
+        "contract_type": "SERVICES",
+        "deadline_date": "2024-12-31",
+        "procedure_type": "OPEN_PROCEDURE",
+        "source_platform": "LICITACIONES_GOB",
+        "awarded_to": providers[0],
+        "description": "Servicio integral de mantenimiento preventivo y correctivo de carreteras",
+        "source_url": "https://www.licitaciones.gob.es",
+    },
+    {
+        "external_id": "CTR-2024-002",
+        "title": "Suministro de material de oficina",
+        "budget": "45000.00",
+        "contracting_authority": "Ayuntamiento de Barcelona",
+        "publication_date": "2024-02-01",
+        "risk_score": 78,
+        "status": "AWARDED",
+        "contract_type": "SUPPLIES",
+        "deadline_date": "2024-06-30",
+        "procedure_type": "RESTRICTED_PROCEDURE",
+        "source_platform": "LICITACIONES_GOB",
+        "awarded_to": providers[9],
+        "description": "Compra de material de oficina",
+        "source_url": "https://www.licitaciones.gob.es",
+    },
+    {
+        "external_id": "CTR-2024-003",
+        "title": "Obras de mejora de infraestructuras educativas Valencia",
+        "budget": "890000.00",
+        "contracting_authority": "Consejería Educación Valencia",
+        "publication_date": "2024-01-20",
+        "risk_score": 92,
+        "status": "AWARDED",
+        "contract_type": "WORKS",
+        "deadline_date": "2024-12-15",
+        "procedure_type": "OPEN_PROCEDURE",
+        "source_platform": "LICITACIONES_GOB",
+        "awarded_to": providers[7],
+        "description": "Reforma y mejora de centros educativos",
+        "source_url": "https://www.licitaciones.gob.es",
+    },
+    {
+        "external_id": "CTR-2024-004",
+        "title": "Servicios de consultoría para transformación digital",
+        "budget": "125000.00",
+        "contracting_authority": "Ministerio Transformación Digital",
+        "publication_date": "2024-01-10",
+        "risk_score": 65,
+        "status": "PENDING",
+        "contract_type": "SERVICES",
+        "deadline_date": "2024-08-31",
+        "procedure_type": "NEGOTIATED_PROCEDURE",
+        "source_platform": "LICITACIONES_GOB",
+        "awarded_to": providers[2],
+        "description": "Asesoramiento integral en transformación digital",
+        "source_url": "https://www.licitaciones.gob.es",
+    },
+    {
+        "external_id": "CTR-2024-005",
+        "title": "Suministro de medicamentos para hospitales públicos",
+        "budget": "2500000.00",
+        "contracting_authority": "Sanidad Castilla La Mancha",
+        "publication_date": "2024-02-05",
+        "risk_score": 35,
+        "status": "AWARDED",
+        "contract_type": "SUPPLIES",
+        "deadline_date": "2024-12-31",
+        "procedure_type": "OPEN_PROCEDURE",
+        "source_platform": "LICITACIONES_GOB",
+        "awarded_to": providers[4],
+        "description": "Suministro anual de medicamentos esenciales",
+        "source_url": "https://www.licitaciones.gob.es",
+    },
+    {
+        "external_id": "CTR-2024-006",
+        "title": "Mantenimiento de sistemas informáticos",
+        "budget": "85000.00",
+        "contracting_authority": "Ayuntamiento de Sevilla",
+        "publication_date": "2024-01-25",
+        "risk_score": 88,
+        "status": "AWARDED",
+        "contract_type": "SERVICES",
+        "deadline_date": "2024-12-31",
+        "procedure_type": "OPEN_PROCEDURE",
+        "source_platform": "LICITACIONES_GOB",
+        "awarded_to": providers[2],
+        "description": "Servicio de mantenimiento anual de infraestructura IT",
+        "source_url": "https://www.licitaciones.gob.es",
+    },
+    {
+        "external_id": "CTR-2024-007",
+        "title": "Transporte y logística de equipamiento",
+        "budget": "150000.00",
+        "contracting_authority": "Defensa",
+        "publication_date": "2024-02-10",
+        "risk_score": 72,
+        "status": "AWARDED",
+        "contract_type": "SERVICES",
+        "deadline_date": "2024-12-31",
+        "procedure_type": "RESTRICTED_PROCEDURE",
+        "source_platform": "LICITACIONES_GOB",
+        "awarded_to": providers[1],
+        "description": "Servicios de transporte y logística",
+        "source_url": "https://www.licitaciones.gob.es",
+    },
+    {
+        "external_id": "CTR-2024-008",
+        "title": "Obras de rehabilitación de viviendas sociales",
+        "budget": "1200000.00",
+        "contracting_authority": "Consejería Vivienda Andalucía",
+        "publication_date": "2024-01-05",
+        "risk_score": 95,
+        "status": "AWARDED",
+        "contract_type": "WORKS",
+        "deadline_date": "2024-11-30",
+        "procedure_type": "OPEN_PROCEDURE",
+        "source_platform": "LICITACIONES_GOB",
+        "awarded_to": providers[7],
+        "description": "Rehabilitación completa de bloques de viviendas sociales",
+        "source_url": "https://www.licitaciones.gob.es",
+    },
+    {
+        "external_id": "CTR-2024-009",
+        "title": "Servicios de limpieza y mantenimiento",
+        "budget": "95000.00",
+        "contracting_authority": "Ayuntamiento de Bilbao",
+        "publication_date": "2024-02-15",
+        "risk_score": 42,
+        "status": "AWARDED",
+        "contract_type": "SERVICES",
+        "deadline_date": "2024-12-31",
+        "procedure_type": "OPEN_PROCEDURE",
+        "source_platform": "LICITACIONES_GOB",
+        "awarded_to": providers[5],
+        "description": "Limpieza y mantenimiento de edificios municipales",
+        "source_url": "https://www.licitaciones.gob.es",
+    },
+    {
+        "external_id": "CTR-2024-010",
+        "title": "Suministro de equipamiento médico",
+        "budget": "550000.00",
+        "contracting_authority": "Hospital General Madrid",
+        "publication_date": "2024-01-30",
+        "risk_score": 58,
+        "status": "AWARDED",
+        "contract_type": "SUPPLIES",
+        "deadline_date": "2024-09-30",
+        "procedure_type": "OPEN_PROCEDURE",
+        "source_platform": "LICITACIONES_GOB",
+        "awarded_to": providers[8],
+        "description": "Adquisición de equipamiento médico especializado",
+        "source_url": "https://www.licitaciones.gob.es",
+    },
+]
+
+for data in contracts_data:
+    Contract.objects.create(**data)
+
+print(f"✓ Cargados {len(providers)} proveedores")
+print(f"✓ Cargados {len(contracts_data)} contratos")
+print(f"Total: {Contract.objects.count()} contratos en la base de datos")
+print(f"Total: {Provider.objects.count()} proveedores en la base de datos")

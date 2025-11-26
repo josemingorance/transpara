@@ -21,8 +21,6 @@ function Navigation() {
     { href: '/', label: 'Dashboard' },
     { href: '/contracts', label: 'Contracts' },
     { href: '/providers', label: 'Providers' },
-    { href: '/alerts', label: 'Alerts' },
-    { href: '/analytics', label: 'Analytics' },
   ];
 
   return (

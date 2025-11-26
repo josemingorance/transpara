@@ -6,7 +6,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { api, Contract, PaginatedResponse } from '@/lib/api';
@@ -21,7 +21,7 @@ import {
   getContractTypeLabel,
 } from '@/lib/utils';
 
-export default function ContractsPage() {
+function ContractsContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [data, setData] = useState<PaginatedResponse<Contract> | null>(null);
@@ -259,5 +259,13 @@ export default function ContractsPage() {
         )}
       </div>
     </div>
+  );
+}
+
+export default function ContractsPage() {
+  return (
+    <Suspense fallback={<Loading />}>
+      <ContractsContent />
+    </Suspense>
   );
 }
