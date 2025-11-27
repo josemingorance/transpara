@@ -103,7 +103,8 @@ export const SpainGeographicMap: React.FC = () => {
     let data = [...geoData.detailed];
 
     data.sort((a, b) => {
-      let aValue: any, bValue: any;
+      let aValue: string | number = 0;
+      let bValue: string | number = 0;
 
       switch (sortField) {
         case 'region':

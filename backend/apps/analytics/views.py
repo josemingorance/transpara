@@ -192,12 +192,8 @@ class AnalyticsViewSet(viewsets.ViewSet):
         return Response(serializer.data)
 
     @action(detail=False, methods=["get"])
-    def risk_distribution(self, request):
-        """
-        Get distribution of contracts by risk level.
-
-        Returns count of contracts in each risk category.
-        """
+    def risk_distribution(self, _request):
+        """Get distribution of contracts by risk level."""
         contracts = Contract.objects.filter(risk_score__isnull=False)
 
         distribution = {
@@ -211,12 +207,8 @@ class AnalyticsViewSet(viewsets.ViewSet):
         return Response(distribution)
 
     @action(detail=False, methods=["get"])
-    def alerts_summary(self, request):
-        """
-        Get summary of alerts by severity and type.
-
-        Returns alert counts grouped by severity and type.
-        """
+    def alerts_summary(self, _request):
+        """Get summary of alerts by severity and type."""
         alerts = ProviderAlert.objects.filter(is_resolved=False)
 
         by_severity = (
@@ -240,12 +232,8 @@ class AnalyticsViewSet(viewsets.ViewSet):
         )
 
     @action(detail=False, methods=["get"])
-    def recent_high_risk(self, request):
-        """
-        Get recent high-risk contracts.
-
-        Returns contracts with risk_score > 70 from last 30 days.
-        """
+    def recent_high_risk(self, _request):
+        """Get recent high-risk contracts from last 30 days."""
         thirty_days_ago = timezone.now() - timedelta(days=30)
 
         contracts = (

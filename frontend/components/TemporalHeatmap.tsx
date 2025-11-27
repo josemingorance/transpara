@@ -208,8 +208,13 @@ export const TemporalHeatmap: React.FC<TemporalHeatmapProps> = ({
                 border: '1px solid #d1d5db',
                 borderRadius: '8px',
               }}
-              formatter={(value: any) => value.toLocaleString()}
-              labelFormatter={(label) => `📅 ${label}`}
+              formatter={(value: number | string) => {
+                if (typeof value === 'number') {
+                  return value.toLocaleString();
+                }
+                return value;
+              }}
+              labelFormatter={(label: string) => `📅 ${label}`}
             />
             <Legend />
             <Bar
@@ -255,11 +260,13 @@ export const TemporalHeatmap: React.FC<TemporalHeatmapProps> = ({
                 border: '1px solid #d1d5db',
                 borderRadius: '8px',
               }}
-              formatter={(value: any) => [
-                value.toFixed(2),
-                'Avg Risk Score',
-              ]}
-              labelFormatter={(label) => `📅 ${label}`}
+              formatter={(value: number | string) => {
+                if (typeof value === 'number') {
+                  return [value.toFixed(2), 'Avg Risk Score'];
+                }
+                return [value, 'Avg Risk Score'];
+              }}
+              labelFormatter={(label: string) => `📅 ${label}`}
             />
             <Line
               type="monotone"

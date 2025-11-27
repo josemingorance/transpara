@@ -204,23 +204,18 @@ function ProvidersContent() {
             </div>
           </div>
 
-          <div className="flex gap-2">
-            <button type="button" className="btn btn-primary">
-              Apply Filters
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                setSearch('');
-                setRegion('');
-                setHighRiskOnly(false);
-                setFlaggedOnly(false);
-              }}
-              className="btn btn-secondary"
-            >
-              Clear
-            </button>
-          </div>
+          <button
+            type="button"
+            onClick={() => {
+              setSearch('');
+              setRegion('');
+              setHighRiskOnly(false);
+              setFlaggedOnly(false);
+            }}
+            className="btn btn-secondary"
+          >
+            Clear Filters
+          </button>
         </form>
       </div>
 

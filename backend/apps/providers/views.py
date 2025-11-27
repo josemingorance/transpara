@@ -81,12 +81,8 @@ class ProviderViewSet(viewsets.ReadOnlyModelViewSet):
         return ProviderListSerializer
 
     @action(detail=False, methods=["get"])
-    def stats(self, request):
-        """
-        Get provider statistics.
-
-        Returns aggregate statistics for filtered providers.
-        """
+    def stats(self, _request):
+        """Get provider statistics."""
         queryset = self.filter_queryset(self.get_queryset())
 
         stats = queryset.aggregate(
@@ -164,12 +160,8 @@ class ProviderViewSet(viewsets.ReadOnlyModelViewSet):
             return Response({"error": str(e)}, status=500)
 
     @action(detail=False, methods=["get"])
-    def by_region(self, request):
-        """
-        Group providers by region.
-
-        Returns provider counts and stats per region.
-        """
+    def by_region(self, _request):
+        """Group providers by region."""
         queryset = self.filter_queryset(self.get_queryset())
 
         regions = (
@@ -186,12 +178,8 @@ class ProviderViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(regions)
 
     @action(detail=False, methods=["get"])
-    def by_industry(self, request):
-        """
-        Group providers by industry.
-
-        Returns provider counts and stats per industry.
-        """
+    def by_industry(self, _request):
+        """Group providers by industry."""
         queryset = self.filter_queryset(self.get_queryset())
 
         industries = (

@@ -32,6 +32,7 @@ export interface Contract {
   risk_score: number;
   status: string;
   contract_type: string;
+  is_overpriced?: boolean;
 }
 
 export interface Provider {
@@ -41,6 +42,8 @@ export interface Provider {
   risk_score?: number;
   total_contracts?: number;
   total_awarded_amount?: string;
+  is_flagged?: boolean;
+  region?: string;
 }
 
 export interface ProviderDetail extends Provider {

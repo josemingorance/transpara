@@ -156,30 +156,3 @@ export const VisualizationDashboard: React.FC = () => {
 };
 
 export default VisualizationDashboard;
-
-/**
- * USAGE EXAMPLE:
- *
- * In your main App.tsx or dashboard page:
- *
- * ```tsx
- * import { VisualizationDashboard } from './components/VisualizationDashboard';
- *
- * function Dashboard() {
- *   return (
- *     <div>
- *       <VisualizationDashboard />
- *     </div>
- *   );
- * }
- *
- * export default Dashboard;
- * ```
- *
- * DEPENDENCIES:
- * - npm install recharts leaflet react-leaflet
- *
- * STYLING:
- * - Uses Tailwind CSS classes
- * - If you're using a different CSS framework, replace Tailwind classes
- */

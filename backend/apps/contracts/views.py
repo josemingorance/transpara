@@ -94,12 +94,8 @@ class ContractViewSet(viewsets.ReadOnlyModelViewSet):
         return ContractListSerializer
 
     @action(detail=False, methods=["get"])
-    def stats(self, request):
-        """
-        Get contract statistics.
-
-        Returns aggregate statistics for filtered contracts.
-        """
+    def stats(self, _request):
+        """Get contract statistics."""
         queryset = self.filter_queryset(self.get_queryset())
 
         stats = queryset.aggregate(
@@ -143,12 +139,8 @@ class ContractViewSet(viewsets.ReadOnlyModelViewSet):
             return Response({"error": str(e)}, status=500)
 
     @action(detail=False, methods=["get"])
-    def by_region(self, request):
-        """
-        Group contracts by region.
-
-        Returns contract counts and stats per region.
-        """
+    def by_region(self, _request):
+        """Group contracts by region."""
         queryset = self.filter_queryset(self.get_queryset())
 
         regions = (
@@ -165,12 +157,8 @@ class ContractViewSet(viewsets.ReadOnlyModelViewSet):
         return Response(regions)
 
     @action(detail=False, methods=["get"])
-    def by_type(self, request):
-        """
-        Group contracts by type.
-
-        Returns contract counts and stats per type.
-        """
+    def by_type(self, _request):
+        """Group contracts by type."""
         queryset = self.filter_queryset(self.get_queryset())
 
         types = (

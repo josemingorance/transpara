@@ -7,7 +7,7 @@
 'use client';
 
 import { useEffect, useState, Suspense } from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { api, Contract, PaginatedResponse } from '@/lib/api';
 import { RiskBadge } from '@/components/RiskBadge';
@@ -22,7 +22,6 @@ import {
 } from '@/lib/utils';
 
 function ContractsContent() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const [data, setData] = useState<PaginatedResponse<Contract> | null>(null);
   const [loading, setLoading] = useState(true);
@@ -59,11 +58,6 @@ function ContractsContent() {
     loadContracts();
   }, [search, region, contractType, highRisk, isOverpriced]);
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    // Trigger reload with new filters
-  };
-
   if (loading && !data) {
     return <Loading />;
   }
@@ -88,7 +82,7 @@ function ContractsContent() {
 
       {/* Filters */}
       <div className="card">
-        <form onSubmit={handleSearch} className="space-y-4">
+        <div className="space-y-4">
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {/* Search */}
             <div>
@@ -160,10 +154,7 @@ function ContractsContent() {
             </div>
           </div>
 
-          <div className="flex gap-2">
-            <button type="submit" className="btn btn-primary">
-              Apply Filters
-            </button>
+          <div className="flex justify-end">
             <button
               type="button"
               onClick={() => {
@@ -175,10 +166,10 @@ function ContractsContent() {
               }}
               className="btn btn-secondary"
             >
-              Clear
+              Clear Filters
             </button>
           </div>
-        </form>
+        </div>
       </div>
 
       {/* Results */}
