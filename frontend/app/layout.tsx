@@ -19,6 +19,7 @@ export const metadata: Metadata = {
 function Navigation() {
   const links = [
     { href: '/', label: 'Dashboard' },
+    { href: '/analytics', label: 'Analytics' },
     { href: '/contracts', label: 'Contracts' },
     { href: '/providers', label: 'Providers' },
   ];

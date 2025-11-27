@@ -39,6 +39,38 @@ export interface Provider {
   name: string;
   tax_id: string;
   risk_score?: number;
+  total_contracts?: number;
+  total_awarded_amount?: string;
+}
+
+export interface ProviderDetail extends Provider {
+  legal_name?: string;
+  address?: string;
+  city?: string;
+  region?: string;
+  postal_code?: string;
+  phone?: string;
+  email?: string;
+  website?: string;
+  industry?: string;
+  company_size?: string;
+  founded_year?: number;
+  avg_contract_amount?: string;
+  success_rate?: number;
+  years_active?: number;
+  flag_reason?: string;
+  is_flagged?: boolean;
+  first_contract_date?: string;
+  last_contract_date?: string;
+}
+
+export interface Alert {
+  id: number;
+  title: string;
+  description: string;
+  severity: 'low' | 'medium' | 'high' | 'critical';
+  alert_type: string;
+  is_resolved: boolean;
 }
 
 export interface ContractDetail extends Contract {
@@ -148,6 +180,48 @@ class APIClient {
       url += `?${queryString}`;
     }
     return this.request(url);
+  }
+
+  async getProvider(id: number): Promise<ProviderDetail> {
+    return this.request(`/providers/${id}/`);
+  }
+
+  async getProviderContracts(id: number): Promise<PaginatedResponse<Contract>> {
+    return this.request(`/providers/${id}/contracts/`);
+  }
+
+  async getProviderAlerts(id: number): Promise<Alert[]> {
+    return this.request(`/providers/${id}/alerts/`);
+  }
+
+  async getProviderStats(): Promise<{
+    total_providers: number;
+    total_contracts: number;
+    total_awarded: number;
+    flagged_count: number;
+    high_risk_count: number;
+    avg_success_rate: number;
+  }> {
+    return this.request('/providers/stats/');
+  }
+
+  async getProvidersByRegion(): Promise<Array<{
+    region: string;
+    count: number;
+    total_contracts: number;
+    total_awarded: number;
+    avg_risk_score: number;
+  }>> {
+    return this.request('/providers/by_region/');
+  }
+
+  async getProvidersByIndustry(): Promise<Array<{
+    industry: string;
+    count: number;
+    total_contracts: number;
+    total_awarded: number;
+  }>> {
+    return this.request('/providers/by_industry/');
   }
 }
 
