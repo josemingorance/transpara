@@ -47,7 +47,7 @@ class Contract(SoftDeleteModel):
     """
 
     # Basic Information
-    title = models.CharField(max_length=500, db_index=True)
+    title = models.CharField(max_length=1000, db_index=True)
     description = models.TextField(blank=True)
     contract_type = models.CharField(
         max_length=20, choices=ContractType.choices, db_index=True
