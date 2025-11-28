@@ -1,13 +1,17 @@
+'use client';
+
 /**
  * Spain Geographic Map Component
  *
  * Displays contract distribution across Spanish regions with:
+ * - Interactive Leaflet map showing regions colored by risk
  * - Regional data cards showing budget and risk metrics
  * - Detailed table of all locations
  * - Color-coded risk levels
  * - Budget visualization
  *
  * Features:
+ * - Interactive map with region selection
  * - Sortable table
  * - Regional summary with key metrics
  * - Risk-based color coding
@@ -15,6 +19,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { InteractiveMap } from './InteractiveMap';
 
 interface RegionData {
   region: string;
@@ -194,6 +199,16 @@ export const SpainGeographicMap: React.FC = () => {
         <p className="text-gray-600 text-sm">
           Contract distribution across Spanish autonomous communities
         </p>
+      </div>
+
+      {/* Interactive Map */}
+      <div className="mb-8">
+        <h3 className="text-lg font-semibold mb-4">🗺️ Interactive Regional Map</h3>
+        <InteractiveMap
+          regionData={geoData.summary_by_region}
+          onRegionClick={setSelectedRegion}
+          selectedRegion={selectedRegion}
+        />
       </div>
 
       {/* Overview Stats */}

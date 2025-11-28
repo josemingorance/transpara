@@ -63,3 +63,11 @@ out/
 *.bak
 *.tmp
 *.temp
+*.pkl
+*.pickle
+
+# Investigation/Temporary Markdown files (these go in /docs)
+backend/*.md
+backend/PHASE1_FILES.txt
+backend/INVESTIGATION_*.txt
+backend/INTEGRATION_*.txt

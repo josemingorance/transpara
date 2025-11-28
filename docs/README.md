@@ -27,6 +27,14 @@ Complete documentation for the PublicWorks AI system - a transparency platform f
 - **[Development Guide](setup/DEVELOPMENT.md)** - Setting up development environment
 - **[Troubleshooting](guides/TROUBLESHOOTING.md)** - Common issues and solutions
 
+### Technical Investigation & Research
+- **[PCSP Data Understanding](UNDERSTANDING_PLACSP_DATA.md)** - Analysis of PLACSP structure and fields
+- **[ATOM Structure Analysis](ATOM_STRUCTURE_ANALYSIS.md)** - ATOM feed parsing details
+- **[Phase 1 Implementation](PHASE1_README.md)** - Crawler infrastructure and implementation
+- **[Phase 1 Delivery Summary](PHASE1_DELIVERY_SUMMARY.md)** - What was delivered in Phase 1
+- **[Data Availability Summary](DATA_AVAILABILITY_SUMMARY.md)** - Available data sources and coverage
+- **[Quick Reference](QUICK_REFERENCE.md)** - Quick lookup for common tasks
+
 ## Project Status
 
 **Phase 0 (Current): MVP Completion** ✅
@@ -98,10 +106,21 @@ docs/
 ├── api/
 │   ├── API.md
 │   └── ENDPOINTS.md
-└── setup/
-    ├── SETUP.md
-    ├── DOCKER.md
-    └── DEVELOPMENT.md
+├── setup/
+│   ├── SETUP.md
+│   ├── DOCKER.md
+│   └── DEVELOPMENT.md
+├── UNDERSTANDING_PLACSP_DATA.md
+├── ATOM_STRUCTURE_ANALYSIS.md
+├── PHASE1_README.md
+├── PHASE1_DELIVERY_SUMMARY.md
+├── PHASE1_INTEGRATION_COMPLETE.md
+├── DATA_AVAILABILITY_SUMMARY.md
+├── QUICK_REFERENCE.md
+├── DEBUG_FINDINGS.md
+├── INVESTIGATION_SUMMARY.md
+├── INVESTIGATION_COMPLETE.md
+└── REFACTORING_COMPLETE.md
 ```
 
 ## License

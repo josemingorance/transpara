@@ -256,8 +256,16 @@ class BaseNormalizer(ABC):
         """
         Normalize contract status to standard choices.
 
+        PLACSP status codes:
+        - 'PUB' = Published
+        - 'RES' = Resolved/Awarded
+        - 'EJE' = Executing/In Progress
+        - 'CAN' = Cancelled
+        - 'FAL' = Failed
+        - 'REV' = Revoked
+
         Args:
-            status_str: Status string
+            status_str: Status string or code
 
         Returns:
             Standardized status
@@ -265,17 +273,32 @@ class BaseNormalizer(ABC):
         if not status_str:
             return "DRAFT"
 
-        status_lower = status_str.lower()
+        code = str(status_str).strip().upper()
+        status_lower = code.lower()
 
-        if any(word in status_lower for word in ["published", "publicado", "active"]):
+        # Map PLACSP status codes
+        placsp_map = {
+            "PUB": "PUBLISHED",
+            "RES": "AWARDED",
+            "EJE": "IN_PROGRESS",
+            "FAL": "CANCELLED",
+            "CAN": "CANCELLED",
+            "REV": "CANCELLED",
+        }
+
+        if code in placsp_map:
+            return placsp_map[code]
+
+        # Text matching for backwards compatibility
+        if any(word in status_lower for word in ["published", "publicado", "active", "pub"]):
             return "PUBLISHED"
-        elif any(word in status_lower for word in ["awarded", "adjudicado"]):
+        elif any(word in status_lower for word in ["awarded", "adjudicado", "res"]):
             return "AWARDED"
         elif any(word in status_lower for word in ["completed", "finalizado", "cerrado"]):
             return "COMPLETED"
-        elif any(word in status_lower for word in ["cancelled", "cancelado", "anulado"]):
+        elif any(word in status_lower for word in ["cancelled", "cancelado", "anulado", "can", "fal", "rev"]):
             return "CANCELLED"
-        elif any(word in status_lower for word in ["progress", "ejecución"]):
+        elif any(word in status_lower for word in ["progress", "ejecución", "eje"]):
             return "IN_PROGRESS"
         else:
             return "DRAFT"

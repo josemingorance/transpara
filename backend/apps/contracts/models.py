@@ -81,9 +81,9 @@ class Contract(SoftDeleteModel):
     )
 
     # Location
-    region = models.CharField(max_length=100, db_index=True)
+    region = models.CharField(max_length=100, blank=True, db_index=True)
     province = models.CharField(max_length=100, blank=True, db_index=True)
-    municipality = models.CharField(max_length=100, blank=True, db_index=True)
+    municipality = models.CharField(max_length=100, blank=True, null=True, db_index=True)
 
     # Source & External References
     source_url = models.URLField(max_length=500, blank=True)

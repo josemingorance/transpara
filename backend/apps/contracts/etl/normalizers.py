@@ -60,8 +60,15 @@ class PCSPNormalizer(BaseNormalizer):
         """
         Normalize procedure type for PCSP.
 
+        PLACSP uses numeric codes:
+        - '1' = Open procedure (Procedimiento abierto)
+        - '2' = Restricted procedure (Procedimiento restringido)
+        - '3' = Negotiated procedure (Procedimiento negociado)
+        - '4' = Competitive dialogue (Diálogo competitivo)
+        - '5' = Innovation partnership (Asociación para innovación)
+
         Args:
-            proc_type: Procedure type string
+            proc_type: Procedure type string or code
 
         Returns:
             Standardized procedure type
@@ -69,18 +76,31 @@ class PCSPNormalizer(BaseNormalizer):
         if not proc_type:
             return "OPEN"
 
-        proc_lower = proc_type.lower()
+        code = str(proc_type).strip().lower()
 
-        if any(word in proc_lower for word in ["abierto", "open"]):
+        # Map numeric PLACSP codes
+        placsp_map = {
+            "1": "OPEN",
+            "2": "RESTRICTED",
+            "3": "NEGOTIATED",
+            "4": "COMPETITIVE_DIALOGUE",
+            "5": "COMPETITIVE_DIALOGUE",
+        }
+
+        if code in placsp_map:
+            return placsp_map[code]
+
+        # Text matching for backwards compatibility
+        if any(word in code for word in ["abierto", "open"]):
             return "OPEN"
-        elif any(word in proc_lower for word in ["restringido", "restricted"]):
+        elif any(word in code for word in ["restringido", "restricted"]):
             return "RESTRICTED"
-        elif any(word in proc_lower for word in ["negociado", "negotiated"]):
+        elif any(word in code for word in ["negociado", "negotiated"]):
             return "NEGOTIATED"
-        elif "menor" in proc_lower or "minor" in proc_lower:
+        elif "menor" in code or "minor" in code:
             return "MINOR"
         elif any(
-            word in proc_lower for word in ["diálogo", "dialogue", "competitivo", "competitive"]
+            word in code for word in ["diálogo", "dialogue", "competitivo", "competitive"]
         ):
             return "COMPETITIVE_DIALOGUE"
         else:
@@ -128,7 +148,7 @@ class BOENormalizer(BaseNormalizer):
             "contracting_authority": raw_data.get("contracting_authority", "").strip(),
             "awarded_to_tax_id": None,  # BOE API doesn't provide awarded provider info
             "awarded_to_name": None,
-            "region": "",  # Could be extracted from section if needed
+            "region": self._extract_region_from_boe(raw_data),
             "province": "",
             "municipality": "",
             "source_url": raw_data.get("source_url", ""),
@@ -209,6 +229,52 @@ class BOENormalizer(BaseNormalizer):
             return "OPEN"  # Regulations are open information
         else:
             return "OPEN"  # Default to open for other types
+
+    def _extract_region_from_boe(self, raw_data: dict[str, Any]) -> str:
+        """
+        Extract region from BOE section/subsection.
+
+        BOE sections contain region information that can be parsed.
+        Maps common BOE regional identifiers to Spanish autonomous communities.
+
+        Args:
+            raw_data: Raw BOE data
+
+        Returns:
+            Region name or empty string if not found
+        """
+        section = raw_data.get("section", "").strip().lower()
+        contracting_authority = raw_data.get("contracting_authority", "").strip().lower()
+
+        # Map of Spanish autonomous communities and common BOE identifiers
+        regions = {
+            "andalucía": ["andalucía", "andalusia"],
+            "aragón": ["aragón", "aragon"],
+            "asturias": ["asturias"],
+            "illes balears": ["balears", "baleares", "balearic"],
+            "país vasco": ["país vasco", "vasco", "basque"],
+            "canarias": ["canarias", "canary"],
+            "cantabria": ["cantabria"],
+            "castilla-la mancha": ["castilla-la mancha", "castilla la mancha"],
+            "castilla y león": ["castilla y león", "castilla leon"],
+            "cataluña": ["cataluña", "catalonia", "barcelona", "girona", "lleida", "tarragona"],
+            "comunidad de madrid": ["madrid", "comunidad de madrid"],
+            "comunidad foral de navarra": ["navarra", "navarre"],
+            "extremadura": ["extremadura"],
+            "galicia": ["galicia", "galician"],
+            "la rioja": ["rioja"],
+            "región de murcia": ["murcia"],
+            "comunitat valenciana": ["valencia", "valenciana", "alicante", "castellón"],
+        }
+
+        # Try to match section or authority to a region
+        for region, keywords in regions.items():
+            for keyword in keywords:
+                if keyword in section or keyword in contracting_authority:
+                    return region
+
+        # Default to Madrid if nothing found (most BOE entries)
+        return "Comunidad de Madrid"
 
 
 # Registry of normalizers

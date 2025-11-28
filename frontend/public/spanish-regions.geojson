@@ -1,0 +1,226 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Comunidad de Madrid",
+        "id": "madrid"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-4.0, 40.3], [-3.0, 40.3], [-3.0, 41.0], [-4.0, 41.0], [-4.0, 40.3]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Cataluña",
+        "id": "catalunya"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [0.2, 41.3], [3.3, 41.3], [3.3, 42.9], [0.2, 42.9], [0.2, 41.3]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Comunitat Valenciana",
+        "id": "valencia"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-0.8, 38.7], [0.5, 38.7], [0.5, 40.6], [-0.8, 40.6], [-0.8, 38.7]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Andalucía",
+        "id": "andalucia"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-3.8, 36.7], [1.8, 36.7], [1.8, 38.8], [-3.8, 38.8], [-3.8, 36.7]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "País Vasco",
+        "id": "pais_vasco"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-3.4, 42.8], [-1.9, 42.8], [-1.9, 43.4], [-3.4, 43.4], [-3.4, 42.8]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Comunidad Foral de Navarra",
+        "id": "navarra"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-2.0, 42.4], [-1.2, 42.4], [-1.2, 43.2], [-2.0, 43.2], [-2.0, 42.4]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Castilla y León",
+        "id": "castilla_leon"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-6.0, 40.3], [-2.0, 40.3], [-2.0, 43.0], [-6.0, 43.0], [-6.0, 40.3]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Castilla-La Mancha",
+        "id": "castilla_mancha"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-3.8, 38.8], [0.3, 38.8], [0.3, 40.3], [-3.8, 40.3], [-3.8, 38.8]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Extremadura",
+        "id": "extremadura"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-7.3, 37.9], [-3.8, 37.9], [-3.8, 40.3], [-7.3, 40.3], [-7.3, 37.9]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Galicia",
+        "id": "galicia"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-9.3, 41.8], [-7.0, 41.8], [-7.0, 43.8], [-9.3, 43.8], [-9.3, 41.8]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Asturias",
+        "id": "asturias"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-6.3, 43.0], [-4.9, 43.0], [-4.9, 43.5], [-6.3, 43.5], [-6.3, 43.0]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Cantabria",
+        "id": "cantabria"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-4.8, 43.0], [-3.1, 43.0], [-3.1, 43.4], [-4.8, 43.4], [-4.8, 43.0]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "La Rioja",
+        "id": "la_rioja"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-2.4, 41.9], [-1.9, 41.9], [-1.9, 42.6], [-2.4, 42.6], [-2.4, 41.9]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Región de Murcia",
+        "id": "murcia"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-1.8, 37.4], [-0.4, 37.4], [-0.4, 38.7], [-1.8, 38.7], [-1.8, 37.4]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Illes Balears",
+        "id": "balears"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [1.2, 38.9], [4.3, 38.9], [4.3, 40.1], [1.2, 40.1], [1.2, 38.9]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Canarias",
+        "id": "canarias"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-18.2, 27.6], [-13.1, 27.6], [-13.1, 29.5], [-18.2, 29.5], [-18.2, 27.6]
+        ]]
+      }
+    },
+    {
+      "type": "Feature",
+      "properties": {
+        "name": "Aragón",
+        "id": "aragon"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [[
+          [-1.8, 40.2], [0.5, 40.2], [0.5, 42.7], [-1.8, 42.7], [-1.8, 40.2]
+        ]]
+      }
+    }
+  ]
+}

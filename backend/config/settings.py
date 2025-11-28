@@ -3,6 +3,7 @@ Django settings for PublicWorks AI project.
 """
 from pathlib import Path
 
+import dj_database_url
 from decouple import Csv, config
 
 # Build paths inside the project
@@ -68,16 +69,19 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 
 # Database
-DATABASES = {
-    "default": {
+DATABASES = {}
+
+if config("DATABASE_URL", default=None):
+    DATABASES["default"] = dj_database_url.config(default=config("DATABASE_URL"), conn_max_age=600)
+else:
+    DATABASES["default"] = {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": config("DB_NAME", default="publicworks_db"),
         "USER": config("DB_USER", default="publicworks"),
         "PASSWORD": config("DB_PASSWORD", default="publicworks"),
-        "HOST": config("DB_HOST", default="localhost"),
+        "HOST": config("DB_HOST", default="db"),
         "PORT": config("DB_PORT", default="5432"),
     }
-}
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
