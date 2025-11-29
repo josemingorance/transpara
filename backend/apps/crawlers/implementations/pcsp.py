@@ -612,8 +612,8 @@ class PCSPCrawler(BaseCrawler):
                 "contract_type": contract_type,
                 "status": status,
                 "source_url": contract_data.get("url") or contract_data.get("link", ""),
-                "region": contract_data.get("region", ""),
-                "municipality": contract_data.get("municipality") or contract_data.get("execution_place_name", ""),
+                "region": contract_data.get("region", "") or self._extract_region_from_authority(authority),
+                "municipality": contract_data.get("municipality") or contract_data.get("execution_place_name"),
             }
 
         except Exception as e:
@@ -697,6 +697,52 @@ class PCSPCrawler(BaseCrawler):
 
         except Exception:
             return None
+
+    def _extract_region_from_authority(self, authority: str) -> str:
+        """
+        Extract region/community from contracting authority name.
+
+        PLACSP authorities often contain city/region names that can be mapped
+        to autonomous communities.
+
+        Args:
+            authority: Contracting authority name
+
+        Returns:
+            Region name or empty string
+        """
+        if not authority:
+            return ""
+
+        authority_lower = authority.lower()
+
+        # Map Spanish autonomous communities and common keywords
+        regions = {
+            "andalucía": ["andalucía", "andalusia", "sevilla", "córdoba", "málaga", "cádiz", "huelva", "jaén", "almería", "granada"],
+            "aragón": ["aragón", "aragon", "zaragoza", "huesca", "teruel"],
+            "asturias": ["asturias", "oviedo"],
+            "illes balears": ["balears", "baleares", "balear", "palma", "mallorca", "menorca", "ibiza"],
+            "país vasco": ["país vasco", "vasco", "basque", "bilbao", "vizcaya", "guipúzcoa", "álava"],
+            "canarias": ["canarias", "canary", "gran canaria", "tenerife", "lanzarote"],
+            "cantabria": ["cantabria", "santander"],
+            "castilla-la mancha": ["castilla-la mancha", "castilla la mancha", "cuenca", "guadalajara", "toledo", "ciudad real", "albacete"],
+            "castilla y león": ["castilla y león", "castilla león", "valladolid", "burgos", "león", "salamanca", "segovia", "soria", "palencia", "zamora", "ávila"],
+            "cataluña": ["cataluña", "catalonia", "barcelona", "girona", "lleida", "tarragona"],
+            "comunidad de madrid": ["madrid", "comunidad de madrid"],
+            "comunidad foral de navarra": ["navarra", "navarre", "pamplona"],
+            "extremadura": ["extremadura", "badajoz", "cáceres"],
+            "galicia": ["galicia", "galician", "a coruña", "lugo", "ourense", "pontevedra", "santiago"],
+            "la rioja": ["rioja", "logroño"],
+            "región de murcia": ["murcia", "región de murcia"],
+            "comunitat valenciana": ["valencia", "valenciana", "alicante", "castellón"],
+        }
+
+        for region, keywords in regions.items():
+            for keyword in keywords:
+                if keyword in authority_lower:
+                    return region
+
+        return ""
 
     def _map_procedure_type(self, procedure_type_raw: str) -> str:
         """
