@@ -5,7 +5,7 @@ import pytest
 from django.test import TestCase
 
 from apps.contracts.etl.base import BaseNormalizer
-from apps.contracts.etl.normalizers import BOENormalizer, PCSPNormalizer, get_normalizer
+from apps.contracts.etl.normalizers import PCSPNormalizer, get_normalizer
 from apps.contracts.models import Contract, RawContractData
 from apps.providers.models import Provider
 
@@ -221,35 +221,6 @@ class TestPCSPNormalizer(TestCase):
         assert normalized["budget"] == Decimal("0")
 
 
-@pytest.mark.django_db
-class TestBOENormalizer(TestCase):
-    """Test BOE-specific normalizer."""
-
-    def test_normalize_boe_format(self):
-        """Test normalizing BOE-specific format."""
-        raw_data = {
-            "boe_id": "BOE-12345",
-            "titulo": "Contrato de servicios",
-            "texto": "Descripción del contrato",
-            "tipo_contrato": "Servicios",
-            "presupuesto": "500.000,00 €",
-            "procedimiento": "Abierto",
-            "fecha_publicacion": "2024-01-15",
-            "organo_contratacion": "Ministerio de Fomento",
-            "comunidad": "Madrid",
-        }
-
-        normalizer = BOENormalizer()
-        normalized = normalizer.normalize(raw_data)
-
-        assert normalized["external_id"] == "BOE-12345"
-        assert normalized["title"] == "Contrato de servicios"
-        assert normalized["description"] == "Descripción del contrato"
-        assert normalized["contract_type"] == "SERVICES"
-        assert normalized["status"] == "PUBLISHED"  # BOE always published
-        assert normalized["budget"] == Decimal("500000.00")
-
-
 class TestGetNormalizer:
     """Test normalizer registry."""
 
@@ -258,12 +229,6 @@ class TestGetNormalizer:
         normalizer = get_normalizer("PCSP")
         assert normalizer is not None
         assert isinstance(normalizer, PCSPNormalizer)
-
-    def test_get_normalizer_boe(self):
-        """Test getting BOE normalizer."""
-        normalizer = get_normalizer("BOE")
-        assert normalizer is not None
-        assert isinstance(normalizer, BOENormalizer)
 
     def test_get_normalizer_unknown(self):
         """Test getting unknown normalizer returns None."""

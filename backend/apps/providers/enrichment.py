@@ -190,36 +190,6 @@ class PCSPEnricher(APIEnricher):
         return None
 
 
-class BOEEnricher(APIEnricher):
-    """
-    Enrich provider data from BOE (Boletín Oficial del Estado).
-
-    BOE publishes official government contracts and notices. This enricher
-    searches BOE for company information and public contract history.
-    """
-
-    BASE_URL = "https://www.boe.es"
-
-    def search_provider(self, tax_id: str, company_name: str) -> dict[str, Any]:
-        """Search BOE for provider information."""
-        # BOE doesn't provide structured API, but we can search for mentions
-        # Focus on PCSP instead for structured data
-        return {"found": False, "source": "boe", "note": "BOE API not fully implemented"}
-
-
-class LinkedDataEnricher(APIEnricher):
-    """
-    Enrich provider data from Linked Data sources.
-
-    Uses public RDF/Linked Data endpoints to enrich company information.
-    """
-
-    def search_provider(self, tax_id: str, company_name: str) -> dict[str, Any]:
-        """Search linked data sources for company information."""
-        # This would integrate with dbpedia, wikidata, etc.
-        return {"found": False, "source": "linked_data", "note": "Not yet implemented"}
-
-
 class EnrichmentPipeline:
     """
     Coordinate enrichment from multiple sources.
@@ -231,8 +201,6 @@ class EnrichmentPipeline:
         self.verbose = verbose
         self.enrichers = [
             PCSPEnricher(verbose=verbose),
-            # LinkedDataEnricher(verbose=verbose),
-            # BOEEnricher(verbose=verbose),
         ]
 
     def enrich(self, tax_id: str, company_name: str) -> dict[str, Any]:

@@ -38,12 +38,13 @@ Complete documentation for the PublicWorks AI system - a transparency platform f
 ## Project Status
 
 **Phase 0 (Current): MVP Completion** ✅
-- ✅ Contract crawling and normalization (BOE, PCSP)
+- ✅ Contract crawling and normalization (PCSP)
 - ✅ Provider extraction from contracts
 - ✅ Provider enrichment with external APIs
 - ✅ Risk scoring and analytics
 - ✅ Frontend UI with filters and dashboards
 - ✅ Code quality refactoring
+- ✅ Simplified to PCSP-only implementation
 
 **Phase 1 (Planned): Dashboard Enhancement**
 - Provider geographic visualization

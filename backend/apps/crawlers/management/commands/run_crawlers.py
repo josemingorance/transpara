@@ -4,7 +4,6 @@ Django management command to run crawlers.
 Usage:
     python manage.py run_crawlers                 # Run all crawlers
     python manage.py run_crawlers --only pcsp     # Run specific crawler
-    python manage.py run_crawlers --only pcsp,boe # Run multiple crawlers
 """
 from django.core.management.base import BaseCommand, CommandError
 
@@ -61,10 +60,6 @@ class Command(BaseCommand):
         try:
             # Import all crawler implementations
             from apps.crawlers.implementations import pcsp  # noqa: F401
-            from apps.crawlers.implementations import boe  # noqa: F401
-
-            # Add more imports as you create more crawlers
-            # from apps.crawlers.implementations import madrid, etc.
         except ImportError as e:
             self.stdout.write(self.style.WARNING(f"Failed to import crawlers: {e}"))
 

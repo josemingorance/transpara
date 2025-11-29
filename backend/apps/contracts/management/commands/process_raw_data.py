@@ -30,7 +30,7 @@ class Command(BaseCommand):
         parser.add_argument(
             "--source",
             type=str,
-            help="Process only records from specific source (e.g., PCSP, BOE)",
+            help="Process only records from specific source (e.g., PCSP)",
         )
         parser.add_argument(
             "--limit",
@@ -153,12 +153,8 @@ class Command(BaseCommand):
             else:
                 data = raw_record.raw_data
 
-            # Extract from BOE contracts
-            if raw_record.source_platform == "BOE":
-                providers_found.extend(self._extract_from_boe_data(data))
-
             # Extract from PCSP contracts
-            elif raw_record.source_platform == "PCSP":
+            if raw_record.source_platform == "PCSP":
                 providers_found.extend(self._extract_from_pcsp_data(data))
 
         except Exception as e:
@@ -193,40 +189,6 @@ class Command(BaseCommand):
                 logger.warning(f"Error processing provider {provider_data.get('tax_id')}: {e}")
 
         return enriched_count
-
-    def _extract_from_boe_data(self, data: dict) -> list:
-        """
-        Extract providers from BOE contract data.
-
-        BOE contracts have: adjudicatario, licitadores, proveedores fields
-        """
-        providers = []
-
-        # Extract adjudicatario (awarded to)
-        if "adjudicatario" in data:
-            adj = data["adjudicatario"]
-            nif = adj.get("nif") or adj.get("NIF")
-            nombre = adj.get("nombre") or adj.get("nombre_empresa")
-            if nif and nombre:
-                providers.append({"tax_id": nif, "name": nombre, "legal_name": nombre})
-
-        # Extract licitadores (bidders)
-        if "licitadores" in data:
-            for licitador in data.get("licitadores", []):
-                nif = licitador.get("nif") or licitador.get("NIF")
-                nombre = licitador.get("nombre") or licitador.get("nombre_empresa")
-                if nif and nombre:
-                    providers.append({"tax_id": nif, "name": nombre, "legal_name": nombre})
-
-        # Extract proveedores (suppliers)
-        if "proveedores" in data:
-            for proveedor in data.get("proveedores", []):
-                nif = proveedor.get("nif") or proveedor.get("NIF")
-                nombre = proveedor.get("nombre") or proveedor.get("nombre_empresa")
-                if nif and nombre:
-                    providers.append({"tax_id": nif, "name": nombre, "legal_name": nombre})
-
-        return providers
 
     def _extract_from_pcsp_data(self, data: dict) -> list:
         """
