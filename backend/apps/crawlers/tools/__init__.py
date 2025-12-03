@@ -5,6 +5,7 @@ This module contains shared tools and helpers used by different crawler implemen
 - atom_parser: ATOM/XML feed parsing with syndication support
 - placsp_fields_extractor: PLACSP-specific field extraction
 - zip_orchestrator: ZIP file discovery and processing orchestration
+- concurrent_processor: Thread-based parallel processing infrastructure
 """
 
 from .atom_parser import (
@@ -22,6 +23,12 @@ from .zip_orchestrator import (
     ZipOrchestrator,
     PlacspZipInfo,
 )
+from .concurrent_processor import (
+    ConcurrentProcessor,
+    ZipConcurrentProcessor,
+    FeedConcurrentProcessor,
+    ProcessingStats,
+)
 
 __all__ = [
     "AtomZipHandler",
@@ -33,4 +40,8 @@ __all__ = [
     "PlacspLicitacion",
     "ZipOrchestrator",
     "PlacspZipInfo",
+    "ConcurrentProcessor",
+    "ZipConcurrentProcessor",
+    "FeedConcurrentProcessor",
+    "ProcessingStats",
 ]

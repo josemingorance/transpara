@@ -89,22 +89,22 @@ class TestBaseNormalizer(TestCase):
         """Test contract type normalization."""
         normalizer = TestNormalizer()
 
-        assert normalizer.normalize_contract_type("Obra de construcción") == "WORKS"
-        assert normalizer.normalize_contract_type("Servicio de limpieza") == "SERVICES"
-        assert normalizer.normalize_contract_type("Suministro de material") == "SUPPLIES"
-        assert normalizer.normalize_contract_type("Contrato mixto") == "MIXED"
-        assert normalizer.normalize_contract_type("Otro") == "OTHER"
+        assert normalizer.normalize_contract_type("Construction work") == "WORKS"
+        assert normalizer.normalize_contract_type("Cleaning service") == "SERVICES"
+        assert normalizer.normalize_contract_type("Material supply") == "SUPPLIES"
+        assert normalizer.normalize_contract_type("Mixed contract") == "MIXED"
+        assert normalizer.normalize_contract_type("Other") == "OTHER"
         assert normalizer.normalize_contract_type(None) == "OTHER"
 
     def test_normalize_status(self):
         """Test status normalization."""
         normalizer = TestNormalizer()
 
-        assert normalizer.normalize_status("Publicado") == "PUBLISHED"
-        assert normalizer.normalize_status("Adjudicado") == "AWARDED"
-        assert normalizer.normalize_status("Finalizado") == "COMPLETED"
-        assert normalizer.normalize_status("Cancelado") == "CANCELLED"
-        assert normalizer.normalize_status("En ejecución") == "IN_PROGRESS"
+        assert normalizer.normalize_status("Published") == "PUBLISHED"
+        assert normalizer.normalize_status("Awarded") == "AWARDED"
+        assert normalizer.normalize_status("Completed") == "COMPLETED"
+        assert normalizer.normalize_status("Cancelled") == "CANCELLED"
+        assert normalizer.normalize_status("In progress") == "IN_PROGRESS"
         assert normalizer.normalize_status(None) == "DRAFT"
 
 
@@ -177,13 +177,13 @@ class TestPCSPNormalizer(TestCase):
         """Test normalizing complete PCSP record."""
         raw_data = {
             "external_id": "PCSP-12345",
-            "title": "Obra de construcción",
+            "title": "Construction work",
             "description": "Test description",
             "contract_type": "WORKS",
             "status": "Publicado",
             "budget": "1.234.567,89",
             "awarded_amount": "1.200.000,00",
-            "procedure_type": "Abierto",
+            "procedure_type": "Open",
             "publication_date": "2024-01-15",
             "deadline": "2024-02-15",
             "award_date": "2024-03-01",
@@ -198,7 +198,7 @@ class TestPCSPNormalizer(TestCase):
         normalized = normalizer.normalize(raw_data)
 
         assert normalized["external_id"] == "PCSP-12345"
-        assert normalized["title"] == "Obra de construcción"
+        assert normalized["title"] == "Construction work"
         assert normalized["contract_type"] == "WORKS"
         assert normalized["status"] == "PUBLISHED"
         assert normalized["budget"] == Decimal("1234567.89")

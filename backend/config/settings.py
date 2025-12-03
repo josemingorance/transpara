@@ -189,3 +189,7 @@ LOGGING = {
         },
     },
 }
+
+# Data Upload Limits
+# Increase limit for admin with large number of records
+DATA_UPLOAD_MAX_NUMBER_FIELDS = 10000  # Default is 1000, increased for large RawContractData tables

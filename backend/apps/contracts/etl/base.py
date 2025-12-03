@@ -290,15 +290,15 @@ class BaseNormalizer(ABC):
             return placsp_map[code]
 
         # Text matching for backwards compatibility
-        if any(word in status_lower for word in ["published", "publicado", "active", "pub"]):
+        if any(word in status_lower for word in ["published", "publicado", "active"]):
             return "PUBLISHED"
-        elif any(word in status_lower for word in ["awarded", "adjudicado", "res"]):
+        elif any(word in status_lower for word in ["awarded", "adjudicado"]):
             return "AWARDED"
         elif any(word in status_lower for word in ["completed", "finalizado", "cerrado"]):
             return "COMPLETED"
-        elif any(word in status_lower for word in ["cancelled", "cancelado", "anulado", "can", "fal", "rev"]):
+        elif any(word in status_lower for word in ["cancelled", "cancelado", "anulado"]):
             return "CANCELLED"
-        elif any(word in status_lower for word in ["progress", "ejecución", "eje"]):
+        elif any(word in status_lower for word in ["progress", "ejecución"]):
             return "IN_PROGRESS"
         else:
             return "DRAFT"

@@ -156,7 +156,12 @@ class ContractAmendmentAdmin(admin.ModelAdmin):
 
 @admin.register(RawContractData)
 class RawContractDataAdmin(admin.ModelAdmin):
-    """Admin for RawContractData model."""
+    """Admin for RawContractData model.
+
+    Note: Bulk delete actions are disabled because with thousands of records,
+    selecting all would exceed DATA_UPLOAD_MAX_NUMBER_FIELDS limit.
+    Use API or management commands for bulk operations instead.
+    """
 
     list_display = [
         "external_id",
@@ -168,8 +173,18 @@ class RawContractDataAdmin(admin.ModelAdmin):
     list_filter = [
         "source_platform",
         "is_processed",
-        "created_at",
     ]
     search_fields = ["external_id", "source_url"]
-    readonly_fields = ["created_at", "updated_at", "processed_at"]
+    readonly_fields = ["created_at", "updated_at", "processed_at", "raw_data"]
     raw_id_fields = ["contract"]
+    ordering = ["-created_at"]
+
+    # Disable bulk actions to prevent form field overflow with large datasets
+    actions = None
+
+    # Limit items per page for better performance
+    list_per_page = 100
+
+    def has_delete_permission(self, request, obj=None):
+        """Disable delete permission - use management commands instead."""
+        return False

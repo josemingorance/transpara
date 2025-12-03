@@ -27,6 +27,17 @@ class Command(BaseCommand):
             action="store_true",
             help="List all available crawlers",
         )
+        parser.add_argument(
+            "--incremental",
+            action="store_true",
+            help="Run in incremental mode (only fetch data since last successful run)",
+        )
+        parser.add_argument(
+            "--since-date",
+            type=str,
+            help="Fetch data since this date (ISO format: YYYY-MM-DD or YYYY-MM-DDTHH:MM:SS). "
+                 "Requires --incremental flag.",
+        )
 
     def handle(self, *args, **options) -> None:
         """Execute the command."""
@@ -47,11 +58,19 @@ class Command(BaseCommand):
         if not crawler_names:
             raise CommandError("No crawlers available")
 
+        # Validate incremental mode options
+        incremental = options.get("incremental", False)
+        since_date = options.get("since_date")
+
+        if since_date and not incremental:
+            raise CommandError("--since-date requires --incremental flag")
+
         # Run each crawler
-        self.stdout.write(self.style.SUCCESS(f"\nRunning {len(crawler_names)} crawler(s)...\n"))
+        mode_str = "incremental" if incremental else "full"
+        self.stdout.write(self.style.SUCCESS(f"\nRunning {len(crawler_names)} crawler(s) in {mode_str} mode...\n"))
 
         for name in crawler_names:
-            self._run_crawler(name)
+            self._run_crawler(name, incremental=incremental, since_date=since_date)
 
         self.stdout.write(self.style.SUCCESS("\n✓ All crawlers completed\n"))
 
@@ -77,12 +96,14 @@ class Command(BaseCommand):
             self.stdout.write(f"  • {name} ({crawler_class.source_platform})")
         self.stdout.write("")
 
-    def _run_crawler(self, name: str) -> None:
+    def _run_crawler(self, name: str, incremental: bool = False, since_date: str | None = None) -> None:
         """
         Run a single crawler.
 
         Args:
             name: Crawler name
+            incremental: Whether to run in incremental mode
+            since_date: Custom date for incremental fetch (ISO format)
         """
         crawler_class = registry.get(name)
 
@@ -90,11 +111,42 @@ class Command(BaseCommand):
             self.stdout.write(self.style.ERROR(f"✗ Crawler '{name}' not found"))
             return
 
-        self.stdout.write(f"Running: {name}...")
+        mode_suffix = " (incremental)" if incremental else ""
+        self.stdout.write(f"Running: {name}{mode_suffix}...")
 
         try:
             crawler = crawler_class()
-            run = crawler.run_crawler()
+
+            # Pass incremental parameters to fetch_raw if supported
+            if incremental:
+                # Pass parameters using config that can be accessed in fetch_raw
+                crawler.config['incremental'] = incremental
+                if since_date:
+                    crawler.config['since_date'] = since_date
+
+                # Call fetch_raw with incremental parameters
+                raw = crawler.fetch_raw(incremental=incremental, since_date=since_date)
+                parsed = crawler.parse(raw)
+                created, updated, failed = crawler.save(parsed)
+
+                # Create run record manually
+                from apps.crawlers.models import CrawlerRun
+                from django.utils import timezone
+
+                run = CrawlerRun.objects.create(
+                    crawler_name=crawler.name,
+                    status="SUCCESS" if failed == 0 else "PARTIAL",
+                    started_at=timezone.now(),
+                    completed_at=timezone.now(),
+                    duration_seconds=0,
+                    records_found=len(parsed),
+                    records_created=created,
+                    records_updated=updated,
+                    records_failed=failed,
+                    config={'incremental': incremental, 'since_date': since_date},
+                )
+            else:
+                run = crawler.run_crawler()
 
             # Display results
             if run.status == "SUCCESS":

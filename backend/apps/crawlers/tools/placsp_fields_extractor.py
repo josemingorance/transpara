@@ -17,7 +17,7 @@ class ContractLot:
     """Represents a single lot in a contract."""
 
     lot_number: Optional[str] = None
-    object: Optional[str] = None  # Objeto del lote
+    object: Optional[str] = None  # Lot object
     budget_without_taxes: Optional[Decimal] = None
     budget_with_taxes: Optional[Decimal] = None
     cpv_code: Optional[str] = None
@@ -98,10 +98,10 @@ class PlacspLicitacion:
     administration_type: Optional[str] = None  # AGE, CCAA, Local, etc
 
     # Procedure details
-    procedure_type: Optional[str] = None  # Abierto, Restringido, Negociado, etc
-    system_type: Optional[str] = None  # Contrato, Acuerdo Marco, etc
-    processing_type: Optional[str] = None  # Ordinaria, Urgente, Emergencia
-    offer_presentation_form: Optional[str] = None  # Manual, Electrónica, etc
+    procedure_type: Optional[str] = None  # Open, Restricted, Negotiated, etc
+    system_type: Optional[str] = None  # Contract, Framework Agreement, etc
+    processing_type: Optional[str] = None  # Ordinary, Urgent, Emergency
+    offer_presentation_form: Optional[str] = None  # Manual, Electronic, etc
 
     # Directive
     applicable_directive: Optional[str] = None
@@ -183,6 +183,8 @@ class PlacspFieldsExtractor:
 
         This handles the current PLACSP format where data is in ContractFolderStatus
         element instead of embedded in atom:content.
+        
+        Uses multiple fallback strategies to handle variance in XML structure.
 
         Args:
             entry_elem: ATOM entry XML element
@@ -195,25 +197,105 @@ class PlacspFieldsExtractor:
             if entry_elem is None:
                 return None
 
-            # Find ContractFolderStatus (CODICE structure)
-            # Try both possible namespace URIs
-            codice_ns_ext_agg = "urn:dgpe:names:draft:codice-place-ext:schema:xsd:CommonAggregateComponents-2"
-            codice_ns_agg = "urn:dgpe:names:draft:codice:schema:xsd:CommonAggregateComponents-2"
-
-            contract_folder = entry_elem.find(f"{{{codice_ns_ext_agg}}}ContractFolderStatus")
-            if contract_folder is None:
-                contract_folder = entry_elem.find(f"{{{codice_ns_agg}}}ContractFolderStatus")
+            # Try multiple namespace variants for ContractFolderStatus
+            contract_folder = self._find_contract_folder_with_fallbacks(entry_elem)
 
             if contract_folder is None:
-                self.logger.debug(f"No ContractFolderStatus found in entry {entry_id}")
-                return None
+                # Fallback: try to extract from atom:summary text
+                self.logger.debug(f"No ContractFolderStatus found in entry {entry_id}, trying text extraction")
+                return self._extract_from_summary_fallback(entry_elem, entry_id)
 
             return self._extract_from_codice(contract_folder, entry_id, entry_elem)
 
         except Exception as e:
             self.logger.debug(f"Error extracting CODICE fields from {entry_id}: {e}")
-            import traceback
-            self.logger.debug(traceback.format_exc())
+            # Don't give up - try text-based extraction as last resort
+            try:
+                return self._extract_from_summary_fallback(entry_elem, entry_id)
+            except:
+                return None
+    
+    def _find_contract_folder_with_fallbacks(self, entry_elem: ET.Element) -> Optional[ET.Element]:
+        """
+        Find ContractFolderStatus element trying multiple namespace variants.
+        
+        Args:
+            entry_elem: Entry element to search in
+        
+        Returns:
+            ContractFolderStatus element or None
+        """
+        # Try all known namespace variations
+        namespace_variants = [
+            "urn:dgpe:names:draft:codice-place-ext:schema:xsd:CommonAggregateComponents-2",
+            "urn:dgpe:names:draft:codice:schema:xsd:CommonAggregateComponents-2",
+            "http://www.plataforma.es/codice",
+            "http://contrataciondelestado.es/codice",
+        ]
+        
+        for ns in namespace_variants:
+            contract_folder = entry_elem.find(f"{{{ns}}}ContractFolderStatus")
+            if contract_folder is not None:
+                return contract_folder
+        
+        # Try without namespace (lenient mode)
+        for elem in entry_elem.iter():
+            if elem.tag.endswith('ContractFolderStatus'):
+                self.logger.debug(f"Found ContractFolderStatus with tag: {elem.tag}")
+                return elem
+        
+        return None
+    
+    def _extract_from_summary_fallback(self, entry_elem: ET.Element, entry_id: str) -> Optional[PlacspLicitacion]:
+        """
+        Extract basic contract info from ATOM summary/title when XML parsing fails.
+        
+        This is a fallback for contracts with non-standard XML structure.
+        
+        Args:
+            entry_elem: Entry element
+            entry_id: Entry ID
+        
+        Returns:
+            PlacspLicitacion with partial data or None
+        """
+        try:
+            licitacion = PlacspLicitacion(
+                identifier=entry_id,
+                link="",
+                update_date=""
+            )
+            
+            # Try to find atom:title
+            for ns_variant in ["http://www.w3.org/2005/Atom", ""]:
+                if ns_variant:
+                    title_elem = entry_elem.find(f"{{{ns_variant}}}title")
+                    summary_elem = entry_elem.find(f"{{{ns_variant}}}summary")
+                else:
+                    # Try without namespace
+                    for elem in entry_elem.iter():
+                        if elem.tag.endswith('title'):
+                            title_elem = elem
+                        if elem.tag.endswith('summary'):
+                            summary_elem = elem
+                
+                if title_elem is not None and title_elem.text:
+                    licitacion.contract_object = title_elem.text.strip()
+                    break
+            
+            # Extract from summary text
+            if summary_elem is not None and summary_elem.text:
+                self._extract_from_summary(summary_elem.text, licitacion)
+            
+            # Only return if we got at least a title
+            if licitacion.contract_object:
+                self.logger.debug(f"Extracted partial data from summary for {entry_id}")
+                return licitacion
+            
+            return None
+            
+        except Exception as e:
+            self.logger.debug(f"Summary fallback extraction failed for {entry_id}: {e}")
             return None
 
     def _extract_from_codice(self, contract_folder: ET.Element, entry_id: str, entry_elem: ET.Element) -> Optional[PlacspLicitacion]:
@@ -288,8 +370,11 @@ class PlacspFieldsExtractor:
         return licitacion
 
     def _extract_from_summary(self, summary_text: str, licitacion: PlacspLicitacion):
-        """Extract key fields from summary text."""
-        # Summary format: "Id licitación: X; Órgano de Contratación: Y; Importe: Z; Estado: W"
+        """Extract key fields from summary text.
+        
+        Summary format from PLACSP: "Id licitación: X; Órgano de Contratación: Y; Importe: Z; Estado: W"
+        (Tender ID, Contracting Authority, Amount, Status)
+        """
         parts = {}
         for part in summary_text.split(";"):
             if ":" in part:
@@ -447,6 +532,7 @@ class PlacspFieldsExtractor:
 
             sme = supplier_elem.find(f"{{{ns['basic']}}}SMEIndicator")
             if sme is not None and sme.text:
+                # Note: "sí" and "si" are Spanish for "yes" from PLACSP data
                 company.is_pyme = sme.text.lower() in ["true", "1", "sí", "si"]
 
             amount = supplier_elem.find(f"{{{ns['agg']}}}AwardAmount/{{{ns['basic']}}}TaxExclusiveAmount")
@@ -539,6 +625,7 @@ class PlacspFieldsExtractor:
         # Subcontracting
         subcontracting_text = self._get_text(root, "pcsp:subcontratacionPermitida")
         if subcontracting_text:
+            # Note: "sí" and "si" are Spanish for "yes" from PLACSP data
             licitacion.subcontracting_allowed = subcontracting_text.lower() in ["sí", "true", "si"]
 
         licitacion.subcontracting_percentage = self._get_decimal(root, "pcsp:porcentajeSubcontratacion")
@@ -587,6 +674,7 @@ class PlacspFieldsExtractor:
 
             abnormally_low = self._get_text(resultado_elem, "pcsp:ofertasExcluidasAbnormementebajas")
             if abnormally_low:
+                # Note: "sí" and "si" are Spanish for "yes" from PLACSP data
                 result.abnormally_low_offers_excluded = abnormally_low.lower() in ["sí", "true", "si"]
 
             result.contract_number = self._get_text(resultado_elem, "pcsp:numeroContrato")
@@ -615,6 +703,7 @@ class PlacspFieldsExtractor:
 
             is_pyme = self._get_text(adjudicatario_elem, "pcsp:esmenor")
             if is_pyme:
+                # Note: "sí" and "si" are Spanish for "yes" from PLACSP data
                 company.is_pyme = is_pyme.lower() in ["sí", "true", "si"]
 
             company.award_amount_without_taxes = self._get_decimal(

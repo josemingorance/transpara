@@ -62,11 +62,11 @@ class PCSPNormalizer(BaseNormalizer):
         Normalize procedure type for PCSP.
 
         PLACSP uses numeric codes:
-        - '1' = Open procedure (Procedimiento abierto)
-        - '2' = Restricted procedure (Procedimiento restringido)
-        - '3' = Negotiated procedure (Procedimiento negociado)
-        - '4' = Competitive dialogue (Diálogo competitivo)
-        - '5' = Innovation partnership (Asociación para innovación)
+        - '1' = Open procedure
+        - '2' = Restricted procedure
+        - '3' = Negotiated procedure
+        - '4' = Competitive dialogue
+        - '5' = Innovation partnership
 
         Args:
             proc_type: Procedure type string or code
@@ -91,7 +91,7 @@ class PCSPNormalizer(BaseNormalizer):
         if code in placsp_map:
             return placsp_map[code]
 
-        # Text matching for backwards compatibility
+        # Text matching for backwards compatibility (matches Spanish keywords from PLACSP)
         if any(word in code for word in ["abierto", "open"]):
             return "OPEN"
         elif any(word in code for word in ["restringido", "restricted"]):
